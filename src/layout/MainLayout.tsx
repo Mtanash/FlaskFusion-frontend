@@ -1,6 +1,7 @@
+import SuspenseLoader from "@/components/SuspenseLoader";
 import MyErrorBoundary from "@/ErrorBoundray/ErrorBoundray";
 import { cn } from "@/lib/utils";
-import { useCallback, useState } from "react";
+import { Suspense, useCallback, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 
@@ -31,7 +32,9 @@ export default function MainLayout() {
             isOpen === false ? "lg:ml-[90px]" : "lg:ml-[240px]"
           )}
         >
-          <Outlet />
+          <Suspense fallback={<SuspenseLoader />}>
+            <Outlet />
+          </Suspense>
         </main>
       </MyErrorBoundary>
     </>
