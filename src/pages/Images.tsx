@@ -7,7 +7,7 @@ import { FileInput, Modal } from "flowbite-react";
 import { useState } from "react";
 
 const MAX_FILES = 10;
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_SIZE = 1 * 1024 * 1024; // 1MB
 
 export default function Images() {
   const queryClinet = useQueryClient();

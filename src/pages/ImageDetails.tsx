@@ -2,14 +2,17 @@ import { generateHistogram } from "@/api/mutations/generateHistogram";
 import { generateSegmentation } from "@/api/mutations/generateSegmentation";
 import { getImageData } from "@/api/queries/getImageData";
 import ColorHistogramChart from "@/components/ColorHistogramChart";
+import ImageCropper from "@/components/ImageCropper";
 import SpinnerComponent from "@/components/SpinnerComponent";
 import { Button } from "@/components/ui/button";
 import CONFIG from "@/config";
 import toaster from "@/lib/toaster";
 import { calculateFileSize } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card } from "flowbite-react";
+import { Card, Modal, Tooltip } from "flowbite-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { ArrowBigDownDash, Copy, Crop } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 export default function ImageDetails() {
@@ -18,15 +21,32 @@ export default function ImageDetails() {
 
   const queryClinet = useQueryClient();
 
+  const [showCropper, setShowCropper] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+  const [segmentationImageUrl, setSegmentationImageUrl] = useState("");
+
   const {
     data: imageData,
     isPending: isImageDataPending,
     isError: isImageDataError,
+    isFetched: isImageDataFetched,
   } = useQuery({
-    queryKey: ["getImageData"],
+    queryKey: ["getImageData", id],
     queryFn: () => getImageData(id!),
     select: (data) => data.data,
   });
+
+  useEffect(() => {
+    if (isImageDataFetched && imageData) {
+      setImageUrl(`${CONFIG.BASE_URL}/uploads/images/${imageData.filename}`);
+
+      if (imageData.segmentation_mask) {
+        setSegmentationImageUrl(
+          `${CONFIG.BASE_URL}/uploads/images/${imageData.segmentation_mask}`
+        );
+      }
+    }
+  }, [imageData, isImageDataFetched]);
 
   const {
     mutate: generateHistogramMutate,
@@ -59,7 +79,15 @@ export default function ImageDetails() {
   if (isImageDataError) return <div>Error</div>;
   if (isImageDataPending) return <SpinnerComponent />;
 
-  const imageUrl = `${CONFIG.BASE_URL}/uploads/images/${imageData.filename}`;
+  const handleDownloadImage = () => {
+    const a = document.createElement("a");
+    a.href = imageUrl;
+    a.download = imageData.original_name;
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   return (
     <AnimatePresence>
@@ -108,21 +136,54 @@ export default function ImageDetails() {
                     "Generate Segmentation Mask"
                   )}
                 </Button>
+
+                <div className="flex gap-3 items-center justify-center">
+                  <Tooltip content="Download">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleDownloadImage}
+                    >
+                      <ArrowBigDownDash />
+                    </Button>
+                  </Tooltip>
+
+                  <Tooltip content="Copy Image URL">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        navigator.clipboard
+                          .writeText(imageUrl)
+                          .then(() => toaster.success("Copied to clipboard"));
+                      }}
+                    >
+                      <Copy />
+                    </Button>
+                  </Tooltip>
+
+                  <Tooltip content="Crop Image">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setShowCropper(true)}
+                    >
+                      <Crop />
+                    </Button>
+                  </Tooltip>
+                </div>
               </div>
             </Card>
           </motion.div>
 
-          {imageData.segmentation_mask && (
+          {segmentationImageUrl && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1 }}
             >
-              <Card
-                className="max-w-sm mb-6"
-                imgSrc={`${CONFIG.BASE_URL}/uploads/images/${imageData.segmentation_mask}`}
-              >
+              <Card className="max-w-sm mb-6" imgSrc={segmentationImageUrl}>
                 <p>Segmentation Mask for {imageData.original_name}</p>
               </Card>
             </motion.div>
@@ -140,6 +201,24 @@ export default function ImageDetails() {
           </motion.div>
         )}
       </div>
+
+      <Modal show={showCropper} onClose={() => setShowCropper(false)}>
+        <Modal.Header>Crop Image</Modal.Header>
+        <Modal.Body>
+          <ImageCropper
+            image={imageUrl}
+            imageId={imageData._id}
+            onFinish={() => {
+              setShowCropper(false);
+            }}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline" onClick={() => setShowCropper(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </AnimatePresence>
   );
 }
