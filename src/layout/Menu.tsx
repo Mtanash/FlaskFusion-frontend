@@ -16,6 +16,7 @@ import {
   LayoutGrid,
   LogOut,
   LucideIcon,
+  TypeOutline,
 } from "lucide-react";
 import { IconType } from "react-icons/lib";
 import { Link } from "react-router-dom";
@@ -71,6 +72,13 @@ export function Menu({ isOpen }: MenuProps) {
           label: "Images",
           active: pathname === "/images",
           icon: Image,
+          submenus: [],
+        },
+        {
+          href: "/text",
+          label: "Text",
+          active: pathname === "/text",
+          icon: TypeOutline,
           submenus: [],
         },
       ],
