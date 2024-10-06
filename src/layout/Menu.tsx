@@ -9,7 +9,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { Ellipsis, File, LayoutGrid, LogOut, LucideIcon } from "lucide-react";
+import {
+  Ellipsis,
+  File,
+  Image,
+  LayoutGrid,
+  LogOut,
+  LucideIcon,
+} from "lucide-react";
 import { IconType } from "react-icons/lib";
 import { Link } from "react-router-dom";
 import { CollapseMenuButton } from "./CollapseMenuButton";
@@ -57,6 +64,13 @@ export function Menu({ isOpen }: MenuProps) {
           label: "CSV",
           active: pathname === "/csv",
           icon: File,
+          submenus: [],
+        },
+        {
+          href: "/images",
+          label: "Images",
+          active: pathname === "/images",
+          icon: Image,
           submenus: [],
         },
       ],

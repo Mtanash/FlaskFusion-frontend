@@ -1,30 +1,16 @@
 import { uploadCSV } from "@/api/mutations/uploadCSV";
-import { getCSVData } from "@/api/queries/getCSVData";
-import { CSVColumns } from "@/components/CSVTable/Columns";
-import { DataTable } from "@/components/CSVTable/DataTable";
+import CSVTable from "@/components/CSVTable";
 import { Button } from "@/components/ui/button";
 import toaster from "@/lib/toaster";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FileInput, Modal } from "flowbite-react";
 import { useState } from "react";
-
-const PAGE_SIZE = 10;
 
 export default function CSV() {
   const queryClinet = useQueryClient();
 
-  const [page, setPage] = useState(1);
   const [openModal, setOpenModal] = useState(false);
   const [file, setFile] = useState<File>();
-
-  const {
-    data: csvData,
-    isPending: isCSVDataPending,
-    isError: isCSVDataError,
-  } = useQuery({
-    queryKey: ["getCSVData", page],
-    queryFn: () => getCSVData(page, PAGE_SIZE),
-  });
 
   const { mutate: mutateCSVData, isPending: isMutatePending } = useMutation({
     mutationKey: ["uploadCSV"],
@@ -47,9 +33,6 @@ export default function CSV() {
     mutateCSVData(file);
   };
 
-  if (isCSVDataPending) return <div>Loading...</div>;
-  if (isCSVDataError) return <div>Error</div>;
-
   return (
     <>
       <div className="p-6 bg-gray-50 min-h-screen">
@@ -60,14 +43,7 @@ export default function CSV() {
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-6">
-          <DataTable
-            columns={CSVColumns}
-            data={csvData.data}
-            count={csvData.total}
-            onPaginationChange={(newData) => console.log(newData)}
-            page={page}
-            pageSize={PAGE_SIZE}
-          />
+          <CSVTable />
         </div>
       </div>
 

@@ -5,6 +5,7 @@ const home = React.lazy(() => import("@/pages/Home"));
 const notFound = React.lazy(() => import("@/pages/NotFound"));
 const csv = React.lazy(() => import("@/pages/CSV"));
 const csvDetails = React.lazy(() => import("@/pages/CSVDetails"));
+const images = React.lazy(() => import("@/pages/Images"));
 
 const routes = [
   {
@@ -22,6 +23,10 @@ const routes = [
       {
         path: "/csv/:id",
         Component: csvDetails,
+      },
+      {
+        path: "/images",
+        Component: images,
       },
       {
         path: "/404",
