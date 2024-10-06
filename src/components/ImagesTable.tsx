@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import CONFIG from "@/config";
 import toaster from "@/lib/toaster";
+import { calculateFileSize } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Modal, Pagination } from "flowbite-react";
 import { MoreHorizontal } from "lucide-react";
@@ -71,6 +72,9 @@ const ImagesTable = () => {
           <TableRow>
             <TableHead>ID</TableHead>
             <TableHead>Image</TableHead>
+            <TableHead>Width</TableHead>
+            <TableHead>Height</TableHead>
+            <TableHead>Size</TableHead>
             <TableHead>Orignal Name</TableHead>
             <TableHead>Uploaded At</TableHead>
           </TableRow>
@@ -96,6 +100,9 @@ const ImagesTable = () => {
                   className="w-16 h-16 object-contain rounded-md"
                 />
               </TableCell>
+              <TableCell>{imageData.width}</TableCell>
+              <TableCell>{imageData.height}</TableCell>
+              <TableCell>{calculateFileSize(imageData.file_size)}</TableCell>
               <TableCell>{imageData.original_name}</TableCell>
               <TableCell>
                 {new Date(imageData.uploaded_at).toLocaleString()}

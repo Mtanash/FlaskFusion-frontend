@@ -5,6 +5,12 @@ interface GetImagesResponse {
   total: number;
 }
 
+export interface ColorHistogram {
+  R: number[];
+  G: number[];
+  B: number[];
+}
+
 export interface ImageData {
   _id: string;
   file_path: string;
@@ -12,11 +18,10 @@ export interface ImageData {
   segmentation_mask: string;
   filename: string;
   uploaded_at: string;
-  color_histogram: {
-    R: number[];
-    G: number[];
-    B: number[];
-  };
+  color_histogram: ColorHistogram;
+  width: number;
+  height: number;
+  file_size: number;
 }
 
 export const getImages = async (
