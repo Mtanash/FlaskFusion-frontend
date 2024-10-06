@@ -1,6 +1,10 @@
+import { deleteCSVRecord } from "@/api/mutations/deleteCSVRecord";
 import { getCSVDataDetails } from "@/api/queries/getCSVDataDetails";
 import { getCSVDataDetailsStatistics } from "@/api/queries/getCSVDataDetailsStatistics";
 import { getCSVDataDetailsTable } from "@/api/queries/getCSVDataDetailsTable";
+import QuartileChart from "@/components/QuartileChart";
+import StatisticsChart from "@/components/StatisticsChart";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -9,27 +13,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useQuery } from "@tanstack/react-query";
-import { Pagination } from "flowbite-react";
+import toaster from "@/lib/toaster";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Modal, Pagination } from "flowbite-react";
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import {
-  VictoryAxis,
-  VictoryBar,
-  VictoryChart,
-  VictoryLabel,
-  VictoryTheme,
-} from "victory";
 
 const PAGE_SIZE = 10;
 
@@ -37,7 +26,11 @@ export default function CSVDetails() {
   const params = useParams();
   const id = params.id;
 
+  const queryClinet = useQueryClient();
+
   const [page, setPage] = useState(1);
+  const [selectedRecordId, setSelectedRecordId] = useState<string>();
+  const [showDeleteModalConfirm, setShowDeleteModalConfirm] = useState(false);
 
   const {
     data: csvDetails,
@@ -66,7 +59,17 @@ export default function CSVDetails() {
     queryFn: () => getCSVDataDetailsStatistics(id!),
   });
 
-  console.log("csvDetailsStatistics", csvDetailsStatistics);
+  const { mutate: deleteRecord, isPending: isDeletePending } = useMutation({
+    mutationKey: ["deleteCSVRecord"],
+    mutationFn: (id: string) => deleteCSVRecord(id),
+    onSuccess: () => {
+      toaster.success("CSV record deleted successfully");
+      queryClinet.invalidateQueries({
+        queryKey: ["getCSVDataDetailsTable"],
+      });
+      setShowDeleteModalConfirm(false);
+    },
+  });
 
   if (isCSVDetailsPending || isCSVDetailsTablePending)
     return <div>Loading...</div>;
@@ -110,6 +113,9 @@ export default function CSVDetails() {
                     {key}
                   </TableHead>
                 ))}
+                <TableHead className="px-4 py-2 text-gray-600 font-medium uppercase">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -123,6 +129,26 @@ export default function CSVDetails() {
                       {value}
                     </TableCell>
                   ))}
+                  <TableCell className="px-4 py-2 text-gray-700 flex gap-2">
+                    {/* <Button
+                      onClick={() => handleEdit(data._id)}
+                      size="icon"
+                      className="p-1 rounded-full"
+                    >
+                      <Pencil />
+                    </Button> */}
+                    <Button
+                      onClick={() => {
+                        setSelectedRecordId(data._id);
+                        setShowDeleteModalConfirm(true);
+                      }}
+                      variant="destructive"
+                      size="icon"
+                      className="p-1 rounded-full"
+                    >
+                      <Trash2 />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -282,67 +308,40 @@ export default function CSVDetails() {
           <QuartileChart data={csvDetailsStatistics} />
         </>
       )}
+
+      <Modal
+        show={showDeleteModalConfirm}
+        onClose={() => setShowDeleteModalConfirm(false)}
+      >
+        <Modal.Header>Delete Record</Modal.Header>
+        <Modal.Body>
+          <div className="space-y-6">
+            <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+              Are you sure you want to delete this record?
+            </p>
+          </div>
+        </Modal.Body>
+        <Modal.Footer className="flex justify-end">
+          <Button
+            variant="destructive"
+            onClick={() => {
+              if (!selectedRecordId) return toaster.error("No record selected");
+
+              deleteRecord(selectedRecordId);
+            }}
+            disabled={isDeletePending}
+          >
+            {isDeletePending ? "Deleting..." : "Delete"}
+          </Button>
+          <Button
+            onClick={() => setShowDeleteModalConfirm(false)}
+            autoFocus
+            disabled={isDeletePending}
+          >
+            Cancel
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
-
-const StatisticsChart = ({ data }) => {
-  const chartData = [
-    { name: "Mean", ...data.mean },
-    { name: "Median", ...data.median },
-    { name: "Mode", ...data.mode },
-  ];
-
-  return (
-    <ResponsiveContainer width="100%" height={400}>
-      <BarChart
-        data={chartData}
-        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Bar dataKey="size" fill="#8884d8" />
-        <Bar dataKey="tip" fill="#82ca9d" />
-        <Bar dataKey="total_bill" fill="#ffc658" />
-      </BarChart>
-    </ResponsiveContainer>
-  );
-};
-
-const QuartileChart = ({ data }) => {
-  const quartileKeys = Object.keys(data.quartiles);
-  const chartData = quartileKeys.map((key) => ({
-    category: key,
-    Q1: data.quartiles[key]["0.25"],
-    Q2: data.quartiles[key]["0.5"],
-    Q3: data.quartiles[key]["0.75"],
-  }));
-
-  return (
-    <VictoryChart theme={VictoryTheme.material}>
-      <VictoryAxis />
-      <VictoryAxis dependentAxis />
-      <VictoryBar
-        data={chartData}
-        x="category"
-        y="Q1"
-        labelComponent={<VictoryLabel dy={-10} />}
-      />
-      <VictoryBar
-        data={chartData}
-        x="category"
-        y="Q2"
-        labelComponent={<VictoryLabel dy={-10} />}
-      />
-      <VictoryBar
-        data={chartData}
-        x="category"
-        y="Q3"
-        labelComponent={<VictoryLabel dy={-10} />}
-      />
-    </VictoryChart>
-  );
-};
