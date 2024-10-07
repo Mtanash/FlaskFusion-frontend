@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 const SentimentDisplay = ({
   sentiment,
 }: {
@@ -21,21 +23,33 @@ const SentimentDisplay = ({
       </h2>
 
       <div className="flex items-center justify-between mb-2">
-        <span
+        <motion.span
           className={`text-xl font-semibold ${
             label === "NEGATIVE" ? "text-red-500" : "text-green-500"
           }`}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
         >
           {label}
-        </span>
-        <span className="text-gray-600">{percentage}%</span>
+        </motion.span>
+        <motion.span
+          className="text-gray-600"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+        >
+          {percentage}%
+        </motion.span>
       </div>
 
       <div className="w-full bg-gray-200 rounded-full h-4">
-        <div
+        <motion.div
           className={`h-full rounded-full ${sentimentColor}`}
-          style={{ width: `${percentage}%` }}
-        ></div>
+          initial={{ width: 0 }}
+          animate={{ width: `${percentage}%` }}
+          transition={{ duration: 0.5 }}
+        ></motion.div>
       </div>
     </div>
   );

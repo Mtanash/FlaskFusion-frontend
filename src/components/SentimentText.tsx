@@ -11,13 +11,14 @@ export default function SentimentText() {
     label: string;
     score: number;
   } | null>(null);
+  const [visualizationKey, setVisualizationKey] = useState(0);
 
   const { mutate: sentiment, isPending: sentimentPending } = useMutation({
     mutationKey: ["sentimentText"],
     mutationFn: (text: string) => sentimentText(text),
     onSuccess(data) {
-      console.log(data);
       setSentimentData(data);
+      setVisualizationKey((prev) => prev + 1);
     },
   });
 
@@ -56,7 +57,9 @@ export default function SentimentText() {
         </Button>
       </form>
 
-      {sentimentData && <SentimentDisplay sentiment={sentimentData} />}
+      {sentimentData && (
+        <SentimentDisplay sentiment={sentimentData} key={visualizationKey} />
+      )}
     </div>
   );
 }
