@@ -83,7 +83,7 @@ export default function CSVDetails() {
         <p className="text-lg text-gray-700">
           File Name:{" "}
           <span className="font-semibold text-red-500">
-            {csvDetails?.data.filename}
+            {csvDetails.filename}
           </span>
         </p>
         <p className="text-lg text-gray-700">
@@ -269,21 +269,17 @@ export default function CSVDetails() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {outliers.map((outlier, index) => (
+                {Object.entries(outliers).map(([index, value]) => (
                   <TableRow
                     key={index}
                     className="hover:bg-gray-50 transition ease-in-out duration-150"
                   >
-                    {Object.values(outlier).map((value, cellIndex) => (
-                      <TableCell
-                        key={cellIndex}
-                        className="px-4 py-2 text-gray-700"
-                      >
-                        {typeof value === "number"
-                          ? new Intl.NumberFormat("en-US").format(value)
-                          : value}
-                      </TableCell>
-                    ))}
+                    <TableCell className="px-4 py-2 text-gray-700">
+                      {index}
+                    </TableCell>
+                    <TableCell className="px-4 py-2 text-gray-700">
+                      {new Intl.NumberFormat("en-US").format(value)}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Tooltip,
@@ -14,7 +14,6 @@ import {
   File,
   Image,
   LayoutGrid,
-  LogOut,
   LucideIcon,
   TypeOutline,
 } from "lucide-react";
@@ -174,7 +173,7 @@ export function Menu({ isOpen }: MenuProps) {
               )}
             </li>
           ))}
-          <li className="w-full grow flex items-end">
+          {/* <li className="w-full grow flex items-end">
             <TooltipProvider disableHoverableContent>
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
@@ -201,7 +200,7 @@ export function Menu({ isOpen }: MenuProps) {
                 )}
               </Tooltip>
             </TooltipProvider>
-          </li>
+          </li> */}
         </ul>
       </nav>
     </ScrollArea>

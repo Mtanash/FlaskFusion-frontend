@@ -24,7 +24,7 @@ export default function MainLayout() {
               : "w-[calc(100%_-_90px)] left-[90px]"
           )}
         >
-          CORPORATICA
+          Flask Fusion
         </nav>
         <main
           className={cn(
