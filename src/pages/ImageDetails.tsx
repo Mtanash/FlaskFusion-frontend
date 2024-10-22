@@ -24,6 +24,7 @@ export default function ImageDetails() {
   const [showCropper, setShowCropper] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [segmentationImageUrl, setSegmentationImageUrl] = useState("");
+  const [visualizationKey, setVisualizationKey] = useState(0);
 
   const {
     data: imageData,
@@ -73,6 +74,7 @@ export default function ImageDetails() {
       queryClinet.invalidateQueries({
         queryKey: ["getImageData"],
       });
+      setVisualizationKey((prev) => prev + 1);
     },
   });
 
@@ -99,7 +101,11 @@ export default function ImageDetails() {
             exit={{ opacity: 0 }}
             transition={{ duration: 1 }}
           >
-            <Card className="max-w-sm mb-6" imgSrc={imageUrl}>
+            <Card
+              className="max-w-sm mb-6"
+              imgSrc={imageUrl}
+              key={visualizationKey}
+            >
               <p>
                 <strong>Original Name:</strong> {imageData.original_name}
               </p>
@@ -182,6 +188,7 @@ export default function ImageDetails() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1 }}
+              key={visualizationKey}
             >
               <Card className="max-w-sm mb-6" imgSrc={segmentationImageUrl}>
                 <p>Segmentation Mask for {imageData.original_name}</p>
@@ -210,6 +217,7 @@ export default function ImageDetails() {
             imageId={imageData._id}
             onFinish={() => {
               setShowCropper(false);
+              setVisualizationKey((prev) => prev + 1);
             }}
           />
         </Modal.Body>
